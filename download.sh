@@ -36,7 +36,7 @@
 # http://opus.nlpl.eu/opusapi
 # This yields data in a json format, which can then be used to download
 # (here using curl and jq on top of wget)
-# # curl "http://opus.nlpl.eu/opusapi/?corpus=EUconst&source=fr&target=&preprocessing=raw&version=latest" | jq '.corpora[0].url' | xargs wget -c
+# # curl "http://opus.nlpl.eu/opusapi/?corpus=EUconst&source=fr&target=&preprocessing=raw&version=latest" | jq '.corpora[1].url' | xargs wget -c
 
 set -e
 
@@ -52,7 +52,16 @@ if [ $# -ge 3 ]
 then
     echo "Running script ..."
 else
-    echo "3 arguments must be provided!"
+    echo ""
+    echo "3 arguments at least must be provided!"
+    echo ""
+    echo "  ./download.sh <data_dir> <corpus_name> <language>"
+    echo ""
+    echo "For cirrus search or other datasets, specify the date (even if empty: '') & url"
+    echo ""
+    echo "  ./download.sh <data_dir> <corpus_name> <language> <date> <url>"
+    echo ""
+    echo "See comments at the start of this script for examples."
     exit 1
 fi
 
