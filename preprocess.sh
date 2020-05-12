@@ -2,12 +2,12 @@
 # Copyright 2019 Hang Le
 # hangtp.le@gmail.com
 
-# Script to extract and preprocess text, 
+# Script to extract and preprocess text,
 #     including sanitization, Moses tokenization,
 #     and sentence segmentation using NLTK.
 
 # Syntax to run this script:
-# ./preprocess <corpus_name> <language>
+# ./preprocess <data_dir> <corpus_name> <language>
 
 set -e
 
@@ -58,7 +58,7 @@ function preprocess {
         fo=$DATA_PATH_CLEAN/$lg.deduped.processed.nc
 
         echo "Processing $f ..."
-        
+
         # Apply aggressive heuristics to filter data from Common Crawl
         if [ ! -f  "$fo" ]; then
             # Clean, tokenize and split sentences
@@ -170,7 +170,7 @@ function preprocess {
 
 # PREPROCESS CORPORA
 if [ "$corpus" == "wiki" ]; then
-    
+
     if [ ! -f $output ]; then
         echo "***** Cleaning, tokenizing and segmenting $lg Wikipedia dump ... *****"
         python $TOOLS_PATH/wikiextractor/WikiExtractor.py $DATA_PATH_RAW/*.bz2 --processes 8 -q -o - \
@@ -193,11 +193,11 @@ if [ "$corpus" == "wiki" ]; then
     else
         echo "Data has been preprocessed and saved in $output."
     fi
-    
+
 
 elif [ "$corpus" == "gutenberg" ]; then
 
-    if [ ! -f $output ]; then 
+    if [ ! -f $output ]; then
         echo "***** Cleaning and tokenizing $lg Project Gutenberg *****"
         python $TOOLS_PATH/gutenberg_cleaner.py -indir $DATA_PATH_RAW -outdir $DATA_PATH_CLEAN
 
