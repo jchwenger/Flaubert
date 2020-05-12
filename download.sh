@@ -4,7 +4,7 @@
 
 # Script to download data from the following corpora:
 # # (Corpus - corpus name to run the script)
-# # 1. Wikipedia - wiki 
+# # 1. Wikipedia - wiki
 # # 2. Project Gutenberg - gutenberg
 # # 3. EuroParl - europarl
 # # 4. News Crawl - news_crawl
@@ -13,10 +13,30 @@
 # # 7. Other corpus as provided in the link
 
 # Syntax to run this script:
-# # ./download.sh <corpus_name> <language>
-# # ./download.sh <corpus_name> <language> <corpus_date> (only for Wikipedia dumps)
-# # ./download.sh <link_to_download>
+# # ./download.sh <data_dir> <corpus_name> <language>
+# # ./download.sh <data_dir> <corpus_name> <language> <corpus_date> cirrus (only for Wikipedia dumps)
+# # ./download.sh <data_dir> <corpus_name> <language> '' <link_to_download> (for other corpora)
 # The dowloaded data is saved under the directory DATA_DIR (first argument)
+
+# Examples for wikimedia dumps
+# See list with recent dates here (they are updated regularly):
+# https://dumps.wikimedia.org/other/cirrussearch/current/
+# # ./download.sh data wikisource fr <date> cirrus
+# # ./download.sh data wikiquote fr <date> cirrus
+# # ./download.sh data wiktionary fr <date> cirrus
+
+# Examples of other corpora (from Opus), raw untokenized French text
+# http://opus.nlpl.eu/giga-fren.php
+# Links can be found on the left-hand side column of the bottom tables on
+# each corpus page,  under the header: "Statistics and TMX/Moses Downloads".
+# # ./download.sh data giga fr '' "http://opus.nlpl.eu/download.php?f=giga-fren/v2/mono/giga-fren.raw.fr.gz"
+# # ./download.sh data opensubtitles fr '' "http://opus.nlpl.eu/download.php?f=OpenSubtitles/v2018/mono/OpenSubtitles.raw.fr.gz"
+
+# Another (preferred) method is to use their api directly, see this page:
+# http://opus.nlpl.eu/opusapi
+# This yields data in a json format, which can then be used to download
+# (here using curl and jq on top of wget)
+# # curl "http://opus.nlpl.eu/opusapi/?corpus=EUconst&source=fr&target=&preprocessing=raw&version=latest" | jq '.corpora[0].url' | xargs wget -c
 
 set -e
 
@@ -24,7 +44,7 @@ set -e
 DATA_DIR=$1
 corpus=$2 # corpus_name (wiki/gutenberg/.../link to download data)
 lg=$3 # input language
-latest=$4 # '' or dump date in case of downloading Wikipedia 
+latest=$4 # '' or dump date in case of downloading Wikipedia
 link=$5 # download link in case corpus is not supported
 
 # Check number of arguments
@@ -71,7 +91,7 @@ elif [ "$corpus" == "europarl" ]; then
     elif [[ $supported_lgs =~ (^|[[:space:]])"$lg"($|[[:space:]]) ]]; then
         download_link=http://www.statmt.org/europarl/v9/training-monolingual/europarl-v9.$lg.gz
     else
-        echo "Language not supported for the corpus $corpus." 
+        echo "Language not supported for the corpus $corpus."
         rmdir $DATA_RAW
     fi
 
@@ -88,16 +108,16 @@ elif [ "$corpus" == "news_commentary" ]; then
         wget -c $download_link -P $DATA_RAW
     else
         echo "Language not supported for the corpus $corpus."
-        rmdir $DATA_RAW 
+        rmdir $DATA_RAW
     fi
 
 elif [ "$corpus" == "news_crawl" ]; then
     supported_lgs="cs de en fi gu kk lt ru zh fr"
     if [[ $supported_lgs =~ (^|[[:space:]])"$lg"($|[[:space:]]) ]]; then
         # download data
-        wget -c -r -l1 -nd -np -P $DATA_RAW -H -t1 -N -A.gz -erobots=off http://data.statmt.org/news-crawl/$lg/ 
+        wget -c -r -l1 -nd -np -P $DATA_RAW -H -t1 -N -A.gz -erobots=off http://data.statmt.org/news-crawl/$lg/
     else
-        echo "Language not supported for the corpus $corpus." 
+        echo "Language not supported for the corpus $corpus."
         rmdir $DATA_RAW
     fi
 
@@ -112,7 +132,7 @@ elif [ "$corpus" == "common_crawl" ]; then
         unxz -k -T 0 $DATA_RAW/$lg.deduped.xz
         echo "Saved raw and extracted data to $DATA_RAW"
     else
-        echo "Language not supported for the corpus $corpus." 
+        echo "Language not supported for the corpus $corpus."
         rmdir $DATA_RAW
     fi
 
@@ -122,7 +142,7 @@ else
         wget -c https://dumps.wikimedia.org/other/cirrussearch/current/"$lg$corpus"-$latest-cirrussearch-content.json.gz -P $DATA_RAW
         echo "Saved data to $DATA_RAW."
     else
-        echo "Download data from supported links in $corpus" 
+        echo "Download data from supported links in $corpus"
         wget -c $link -P $DATA_RAW
         echo "Downloaded data and saved to $DATA_RAW."
     fi
